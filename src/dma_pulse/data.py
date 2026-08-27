@@ -1,28 +1,19 @@
+"""Preprocessing helpers for the published PULSE representation."""
+
+from __future__ import annotations
+
 import numpy as np
-from sklearn.preprocessing import MinMaxScaler
 
 
-class PulsePreprocessor:
-    """Preprocess tabular activity data into fixed-length sequences."""
+EXPECTED_SEQUENCE_LENGTH = 5
+EXPECTED_FEATURE_DIM = 11
 
-    def __init__(self, sequence_length=5):
-        self.sequence_length = sequence_length
-        self.scaler = MinMaxScaler()
 
-    def fit_transform(self, X):
-        X = np.asarray(X, dtype=np.float32)
-        shape = X.shape
-        flat = X.reshape(-1, shape[-1]) if X.ndim == 3 else X
-        flat = self.scaler.fit_transform(flat)
-        if X.ndim == 3:
-            return flat.reshape(shape).astype(np.float32)
-        return flat.astype(np.float32)
-
-    def transform(self, X):
-        X = np.asarray(X, dtype=np.float32)
-        shape = X.shape
-        flat = X.reshape(-1, shape[-1]) if X.ndim == 3 else X
-        flat = self.scaler.transform(flat)
-        if X.ndim == 3:
-            return flat.reshape(shape).astype(np.float32)
-        return flat.astype(np.float32)
+def validate_representation(X: np.ndarray) -> None:
+    """Validate the expected [N, 5, 11] sequence representation."""
+    if X.ndim != 3:
+        raise ValueError("Expected X shaped [N, sequence, features]")
+    if X.shape[1:] != (EXPECTED_SEQUENCE_LENGTH, EXPECTED_FEATURE_DIM):
+        raise ValueError(
+            f"Expected X shaped [N, 5, 11], received {tuple(X.shape)}"
+        )
